@@ -1,0 +1,93 @@
+{
+	"variables": [],
+	"info": {
+		"name": "People",
+		"_postman_id": "b962a499-537f-0459-c963-3002ce32c60e",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "localhost:9000/people/add",
+			"request": {
+				"url": "localhost:9000/people/add",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n\t\"firstName\":\"Karan\",\n\t\"lastName\":\"Thakkar\",\n\t\"email\":\"kthakkar@argusoft.com\",\n\t\"phoneMobile\":\"9999999999\"\n}"
+				},
+				"description": "router.post('/add', function(req, res){\n    var peopleInfo = req.body;\n    console.log(peopleInfo);\n    if(!peopleInfo.firstName || !peopleInfo.lastName || !peopleInfo.address.street || !peopleInfo.address.landmark\n      || !peopleInfo.address.city || !peopleInfo.address.pincode || !peopleInfo.phoneMobile || !peopleInfo.email || !peopleInfo.files){\n        res.end(\"Sorry, you provided wrong info\");\n    }\n    else{\n          var newPeople = new People({\n          firstName: peopleInfo.firstName,\n          lastName: peopleInfo.lastName,\n          address: {\n          city: peopleInfo.address.city,\n          landmark: peopleInfo.address.landmark,\n          street: peopleInfo.address.street,\n          pincode: peopleInfo.address.pincode\n          },\n          email: peopleInfo.email,\n          phoneMobile: peopleInfo.phoneMobile,\n          })\n          newPeople.save(function(err, resp){\n              if(err)\n                  res.end('Error Adding to Database');\n              else{\n                  Files.find({ 'name': { $in : peopleInfo.files } }, {'_id':1}, function (err, files){\n                        if (err || files === null) res.end(\"Files Name Invalid\");\n                        newPeople.ownerID = files;\n                        console.log(files);\n                        newPeople.save(function(err, response){\n                            res.end(\"Data Added Successfully\");\n                    });\n                });\n          }\n      });\n    }\n});"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:9000/people/list",
+			"request": {
+				"url": "localhost:9000/people/list",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "router.get('/list', function(req, res){\n  People.find({}).populate('ownerID', {'name':1, '_id':0}).exec(function (err, docs) {\n    if(err)\n        res.end('Error Retrieving from Database');\n    else\n         res.json(docs);\n     });\n});"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:9000/people/get/58b7d1b598c8723e4852568c",
+			"request": {
+				"url": "localhost:9000/people/get/58b916b0c6c272224ea3baf1",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "router.get('/get/:id', function(req, res){\n  People.find({_id: req.params.id}).populate('ownerID', {'name':1, '_id':0}).exec(function (err, docs) {\n    if(err)\n        res.end('Error Retrieving from Database');\n    else\n         res.json(docs);\n     });\n});"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:9000/people/update",
+			"request": {
+				"url": "localhost:9000/people/update",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n\t\"_id\": \"58b916b0c6c272224ea3baf1\",\n\t\"phoneMobile\":\"8888888888\"\n}"
+				},
+				"description": "router.put('/update', function(req, res){\n\n  function callback (err, data) {\n    if(err)\n      res.end('Error Updating!');\n    else res.end(JSON.stringify(data));\n  }\n\n  var options = { multi: true };\n  var condition = { _id: req.body._id }\n  global.peopleInfo = req.body;\n\n  if(peopleInfo.files){\n      Files.find({ 'name': { $in : peopleInfo.files }}, {'_id':1}, function (err, files){\n          peopleInfo['ownerID'] = [];\n          console.log(peopleInfo);\n          if (err || files === null) res.end(\"Files Name Invalid\");\n          else peopleInfo.ownerID = files;\n          People.findOneAndUpdate(condition, peopleInfo, { new : true }, callback);\n        });\n  }\n    else People.findOneAndUpdate(condition, flatten(peopleInfo), { new : true }, callback);\n});\n\n"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:9000/people/delete",
+			"request": {
+				"url": "localhost:9000/people/delete",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n\t\"_id\" : \"58b916b0c6c272224ea3baf1\"\n}"
+				},
+				"description": "router.delete('/delete', function(req, res){\n  People.remove({_id: req.body._id}, function (err, numAffected) {\n    if(err)\n        res.end('Error Deleting from Database');\n    else if(JSON.parse(numAffected).n != 0)\n        res.end(\"Rows Deleted: \" + JSON.stringify(numAffected));\n    else res.end(\"No Matching Entry Found\");\n     });\n})"
+			},
+			"response": []
+		}
+	]
+}

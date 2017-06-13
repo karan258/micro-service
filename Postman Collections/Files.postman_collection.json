@@ -1,0 +1,111 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Files",
+		"_postman_id": "ab99347c-488b-f88e-b8b6-d85889d61b4d",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "localhost:9000/files/add",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var responseJSON;",
+							"",
+							"try { responseJSON = JSON.parse(responseBody); }",
+							"catch (e) { }",
+							"",
+							"",
+							"tests[\"response has data\"] = responseJSON && responseJSON.data && (responseJSON.data.length === 256);",
+							"tests[\"content-type equals text/plain\"] = responseJSON && responseJSON.headers && (responseJSON.headers[\"content-type\"] === 'text/plain');"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "localhost:9000/files/add",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n\t\"userid\" : \"593fd11e64de7f4762adcd78\",\n\t\"keywords\" : \"File\"\n}"
+				},
+				"description": "router.post('/add', function(req, res){\n    var fileInfo = req.body;\n    console.log(fileInfo);\n    if(fileInfo.sname && fileInfo.stype && (fileInfo.stype === 'Optional' || fileInfo.stype === 'Mandatory')){\n      var newFile = new Files({\n          name: fileInfo.sname,\n          stype: fileInfo.stype\n      });\n      newFile.save(function(err, resp){\n          if(err)\n              res.end('Error Adding to Database');\n          else{\n              res.write('Data added Successfully!\\n');\n              res.end(JSON.stringify(resp));\n            }\n      });\n    }\n    else{\n      res.end(\"Sorry, you provided wrong info\");\n    }\n  });"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:9000/files/list",
+			"request": {
+				"url": "localhost:9000/files/list",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "router.get('/list', function(req, res){\n  Files.find({}, function (err, docs) {\n    if(err)\n        res.end('Error Retrieving from Database');\n    else\n         res.json(docs);\n     });\n});"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:9000/files/get/58b7cd0a98c8723e48525687",
+			"request": {
+				"url": "localhost:9000/files/get/58b7cd0a98c8723e48525687",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "router.get('/get/:id', function(req, res){\n  Files.find({_id: req.params.id}, function (err, docs) {\n    if(err)\n        res.end('Error Retrieving from Database');\n    else\n         res.json(docs);\n     });\n});"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:9000/files/update",
+			"request": {
+				"url": "localhost:9000/files/update",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n\t\"_id\": \"593fe0c02beeb6529c76696c\",\n\t\"keywords\" : \"NewFile\"\n}"
+				},
+				"description": "router.put('/update', function(req, res){\n  function callback (err, numAffected) {\n    if(err)\n      res.end('Error Updating!');\n    else res.end(JSON.stringify(numAffected));\n  }\n\n  var fileInfo = req.body;\n  console.log(fileInfo);\n  if(fileInfo.sname && fileInfo.stype && (fileInfo.stype === 'Optional' || fileInfo.stype === 'Mandatory')){\n      var condition = { _id: req.body._id };\n      var update = {$set: {\n        name: fileInfo.sname,\n        stype: fileInfo.stype\n        }}\n      var options = {multi: true};\n      Files.update(condition, update, options, callback);\n    }\n  else{\n      res.end(\"Sorry, you provided wrong info\");\n  }\n});"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:9000/files/delete",
+			"request": {
+				"url": "localhost:9000/files/delete",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n\t\"_id\" : \"58b918e5c6c272224ea3baf3\"\n}"
+				},
+				"description": "router.delete('/delete', function(req, res){\n  Files.remove({_id: req.body._id}, function (err, numAffected) {\n    if(err)\n        res.end('Error Deleting from Database');\n    else if(JSON.parse(numAffected).n != 0)\n         res.end(\"Rows Deleted: \" + JSON.stringify(numAffected));\n    else res.end(\"No Matching Entry Found\");\n     });\n})"
+			},
+			"response": []
+		}
+	]
+}
