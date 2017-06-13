@@ -6,19 +6,37 @@
 var People = require('../People/people_model');
 var Files = require('./files_model');
 
+var multer  =   require('multer');
+var storage =   multer.diskStorage({
+  destination: function (req, file, callback) {
+    callback(null, 'public/uploads');
+  },
+  filename: function (req, file, callback) {
+    callback(null, file.fieldname + '-' + Date.now());
+  }
+});
+var upload = multer({ storage : storage}).single('fileName');
+
 // Function to add new file
 var addFile = function (req, res) {
     var fileInfo = req.body;
     var newFile = new Files({
         ownerID: fileInfo.userid,
-        keywords: fileInfo.keywords
+        keywords: fileInfo.keywords,
     });
 
-    newFile.save(function (err, resp) {
-        if (err) {
-            res.end('Error creating record!');
+    upload(req,res,function(err) {
+        if(err) {
+            return res.end("Error uploading file.");
         } else {
-            res.end('Record added successfully!');
+            newFile.path = req.file.path;
+            newFile.save(function (err, resp) {
+                if (err) {
+                    res.end('Error creating record!');
+                } else {
+                    res.end("File uploaded successfully");
+                }
+            });
         }
     });
 }

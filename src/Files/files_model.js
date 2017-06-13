@@ -26,6 +26,7 @@ var filesSchema = mongoose.Schema({
     modelId: String,
     masks: Boolean,
     keywords: String,
+    path: String,
     ownerID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'People'
